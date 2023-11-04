@@ -1,0 +1,69 @@
+'------------------------------------------------------------------------------------------
+' Designed & Developed By   : BOUAZIZI Atef...
+' Email                     : Bouazizi-Atef@Outlook.Com
+'------------------------------------------------------------------------------------------
+' Created in                : 2023-11-04
+'__________________________________________________________________________________________
+'Export SpeardSheet to new Workbook in EXCEL;...
+'Exporter la feuille de calcul à nouveau classeur en EXCEL;...
+'------------------------------------------------------------------------------------------
+Option Explicit
+
+Sub EXPORT_SPEARD_SHEET_TO_NEW_WORKBOOK()
+    Dim ACTIVE_WKB              As New Workbook
+    Dim ACTIVE_WKS              As New Worksheet
+    Dim NEW_WKB                 As New Workbook
+    Dim OBJ_WORKBOOK            As New Workbook
+    Dim OBJ_EXCEL               As Object
+    Dim SAVE_FILE               As Variant
+On Error GoTo PErr
+    Set OBJ_EXCEL = Nothing
+    Set ACTIVE_WKB = ThisWorkbook
+    Set ACTIVE_WKS = ACTIVE_WKB.ActiveSheet
+    ACTIVE_WKB.Activate
+    If MsgBox("Do you want to export the sheet?..", vbYesNo + vbQuestion + vbDefaultButton1, "Export SpeardSheet") = vbNo Then Exit Sub
+    Application.ScreenUpdating = False
+    Workbooks.Add
+    Set NEW_WKB = ActiveWorkbook
+    With ACTIVE_WKS
+        .Visible = xlSheetVisible
+        .Copy After:=NEW_WKB.Sheets(1)
+    End With
+    NEW_WKB.ActiveSheet.Buttons.Delete
+    Windows(NEW_WKB.Name).Visible = False
+    With Application
+        .DisplayAlerts = False
+        NEW_WKB.Sheets(1).Delete
+        .DisplayAlerts = True
+    End With
+    SAVE_FILE = Application.GetSaveAsFilename(InitialFileName:="PSpaceIT-" & Replace(Format(Date, "YYYY-MM-DD"), "-", "") & Replace(Format(Time, "HH:MM:SS"), ":", ""), _
+                                                FileFilter:="Excel 2007 Workbook(*.xlsx),*.xlsx, Excel 97-2003 Workbook(*.xls), *.xls, Excel 2007 Template(*.xltx), *.xltx, Excel 97-2003 Template(*.xlt), *.xlt,", _
+                                                Title:="Save file...")
+    Windows(NEW_WKB.Name).Visible = True
+    If SAVE_FILE <> False Then NEW_WKB.SaveAs SAVE_FILE
+    NEW_WKB.Close SaveChanges:=False
+    ACTIVE_WKB.Activate
+    Application.ScreenUpdating = True
+    If SAVE_FILE <> False Then
+        If MsgBox("The sheet was successfully exported..." & vbCr & vbCr & "Do you want to open the file?..." _
+            , vbYesNo + vbQuestion + vbDefaultButton2, APP_NAME & APP_VERSION) = vbYes Then
+
+            Set OBJ_EXCEL = CreateObject("Excel.Application")
+            Set OBJ_WORKBOOK = OBJ_EXCEL.Workbooks.Open(SAVE_FILE, , False)
+            OBJ_EXCEL.Visible = True
+            OBJ_EXCEL.DisplayFullScreen = True
+            OBJ_EXCEL.WindowState = xlMaximized
+        End If
+    End If
+    Set ACTIVE_WKB = Nothing
+    Set ACTIVE_WKS = Nothing
+    Set NEW_WKB = Nothing
+    Set OBJ_EXCEL = Nothing
+    Set OBJ_WORKBOOK = Nothing
+Exit Sub
+PErr:
+    MsgBox Err.Number & vbCr & Err.Description & vbCr & Err.Source & vbCr & _
+            "Compile Error | Exporter la feuille de calcul à nouveau classeur en EXCEL" & vbCr & _
+            "Mdl_Base/EXPORT_SPEARD_SHEET_TO_NEW_WORKBOOK", vbCritical, "PSpaceIT"
+End Sub
+
